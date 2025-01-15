@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import prisma from "@/utils/prisma";
 import { createClient } from '@/utils/supabase/server';
 import { kindergartenSchema } from '../utils';
-
-const prisma = new PrismaClient();
 
 export async function GET(
   req: Request,

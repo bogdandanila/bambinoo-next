@@ -1,8 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
-import { PrismaClient } from '@prisma/client';
 import { kindergartenSchema } from './utils';
-
-const prisma = new PrismaClient();
+import prisma from "@/utils/prisma";
 
 export async function getKindergarten(kindergartenId: string) {
   const supabase = await createClient();

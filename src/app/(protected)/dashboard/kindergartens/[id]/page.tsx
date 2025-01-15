@@ -104,7 +104,7 @@ export default async function KindergartenPage({ params }: Props) {
 
           <div className="mt-6 flex justify-end space-x-3">
             <CancelButton />
-            <SubmitButton isNew={isNew} />
+            <SubmitButton>Create</SubmitButton>
           </div>
         </form>
       </div>
