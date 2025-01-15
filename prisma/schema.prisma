@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String    @unique
+  phone           String?
+  occupation      String?
+  invitation      InvitationStatus @default(none)
+  classroomsAdded Boolean   @default(false)
+  staffClassroomId String?
+  profileImage    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  kindergartenRoles UserKindergartenRole[]
+  parentRelations   ParentChildRelationship[] @relation("ParentRelations")
+}
+
+model Kindergarten {
+  id          String    @id @default(cuid())
+  name        String
+  country     String
+  city        String
+  phoneNumber String?
+  address     String?
+  email       String?
+  logo        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  classrooms  Classroom[]
+  userRoles   UserKindergartenRole[]
+  menus       Menu[]
+}
+
+model Classroom {
+  id            String    @id @default(cuid())
+  name          String
+  kindergartenId String
+  kindergarten   Kindergarten @relation(fields: [kindergartenId], references: [id])
+  children      Child[]
+  events        Event[]
+}
+
+model Child {
+  id            String    @id @default(cuid())
+  firstName     String
+  lastName      String
+  dateOfBirth   DateTime?
+  gender        Gender?
+  uniqueIdentifyingNumber String?
+  classroomId   String
+  classroom     Classroom @relation(fields: [classroomId], references: [id])
+  parentRelations ParentChildRelationship[] @relation("ChildRelations")
+  events        Event[]
+}
+
+model UserKindergartenRole {
+  id            String    @id @default(cuid())
+  userId        String
+  kindergartenId String
+  role          UserRole
+  user          User      @relation(fields: [userId], references: [id])
+  kindergarten  Kindergarten @relation(fields: [kindergartenId], references: [id])
+
+  @@unique([userId, kindergartenId])
+}
+
+model ParentChildRelationship {
+  id            String    @id @default(cuid())
+  parentId      String
+  childId       String
+  relationship  RelationType
+  parent        User      @relation("ParentRelations", fields: [parentId], references: [id])
+  child         Child     @relation("ChildRelations", fields: [childId], references: [id])
+
+  @@unique([parentId, childId])
+}
+
+model Event {
+  id            String    @id @default(cuid())
+  eventType     EventType
+  value         String
+  subType       String?
+  date          DateTime
+  childId       String
+  classroomId   String
+  child         Child     @relation(fields: [childId], references: [id])
+  classroom     Classroom @relation(fields: [classroomId], references: [id])
+
+  @@index([date(sort: Desc)])
+}
+
+model Menu {
+  id            String    @id @default(cuid())
+  kindergartenId String
+  date          DateTime
+  fileId        String
+  kindergarten  Kindergarten @relation(fields: [kindergartenId], references: [id])
+}
+
+enum UserRole {
+  admin
+  staff
+}
+
+enum Gender {
+  m
+  f
+}
+
+enum InvitationStatus {
+  none
+  pending
+  accepted
+}
+
+enum RelationType {
+  mother
+  father
+  grandmother
+  grandfather
+  guardian
+  other
+}
+
+enum EventType {
+  attendance
+  food
+  sleep
+  health
+  bathroom
+  other
+}
