@@ -2,7 +2,7 @@ import { getUser } from '@/utils/getUser';
 import Link from 'next/link';
 
 export default async function HomePage() {
-  const user = await getUser()
+  const {user} = await getUser({ preventRedirect: true })
 
   return (
     <div className="relative isolate overflow-hidden bg-white">
